@@ -1,0 +1,5 @@
+/* dabble's starter CSS. Replace with your project's own design. */
+:root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+* { box-sizing: border-box; }
+body { max-width: 42rem; margin: 4rem auto; padding: 0 1rem; line-height: 1.55; }
+button { font: inherit; padding: .65rem 1rem; cursor: pointer; border-radius: .5rem; }

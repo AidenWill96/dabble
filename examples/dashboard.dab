@@ -1,0 +1,68 @@
+# dabble 0.2: computed state, reactive props, browser routing and async fetch.
+def App():
+    count = signal(0)
+    double_count = computed(lambda: count.get() * 2)
+    button_label = computed(lambda: f"Clicks: {count.get()}")
+    status_class = computed(lambda: "value elevated" if count.get() >= 5 else "value")
+    status_color = computed(lambda: "#d97706" if count.get() >= 5 else "#2563eb")
+    remote_title = signal("No request made yet")
+
+    def increment():
+        count.set(count.get() + 1)
+
+    def decrement():
+        count.set(count.get() - 1)
+
+    def go_about():
+        navigate("/about")
+
+    def go_home():
+        navigate("/")
+
+    async def load_sample():
+        remote_title.set("Loading a sample JSON endpoint...")
+        try:
+            data = await fetch_json("https://jsonplaceholder.typicode.com/todos/1")
+            remote_title.set(data["title"])
+        except Exception as error:
+            remote_title.set("Could not load sample data")
+
+    return main(
+        header(
+            span("dabble", class_="brand"),
+            span("v0.2", class_="version"),
+            class_="topbar"
+        ),
+        section(
+            p("INTERACTIVE PLAYGROUND", class_="eyebrow"),
+            h1("Write less. Build for the web."),
+            p("Python-like source, reactive browser components, zero build dependencies.", class_="subtitle"),
+            div(
+                div("Counter", class_="label"),
+                div(count, class_=status_class, style={"color": status_color}),
+                p("Double: ", double_count, class_="derived"),
+                div(
+                    button("−", onclick=decrement, class_="square"),
+                    button(button_label, onclick=increment, class_="primary"),
+                    class_="controls"
+                ),
+                class_="panel"
+            ),
+            div(
+                h2("Browser APIs"),
+                p("Route: ", path(), class_="route"),
+                div(
+                    button("Home", onclick=go_home, class_="secondary"),
+                    button("About", onclick=go_about, class_="secondary"),
+                    class_="controls"
+                ),
+                p("API response: ", remote_title, class_="api-result"),
+                button("Fetch example JSON", onclick=load_sample, class_="secondary"),
+                class_="panel panel-side"
+            ),
+            class_="content"
+        ),
+        class_="shell"
+    )
+
+mount("#app", App)

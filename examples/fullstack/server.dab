@@ -1,0 +1,6 @@
+from shared import site_title
+
+def hello(req):
+    return {"message": site_title(), "query": req.query}
+
+route("GET", "/api/hello", hello)

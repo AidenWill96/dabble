@@ -1,0 +1,12 @@
+# LocalStorage example; run from an HTTP(S) origin.
+def SavedCounter():
+    initial = storage_get("dabble-demo-count", 0)
+    count = signal(initial)
+
+    def increment():
+        count.set(count.get() + 1)
+        storage_set("dabble-demo-count", count.get())
+
+    return div(h1("Saved count"), p(count), button("+1", onclick=increment))
+
+mount("#app", SavedCounter)

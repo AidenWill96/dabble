@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "packages": {
+    "greetings": {
+      "version": "0.1.0",
+      "sha256": "b5846da62b101d0568b7fe64fa82f0e69613eec94c67714498af87146eee58cf",
+      "source": "# Community package example: string greetings.\ndef hello(name):\n    return f\"Hello, {name}!\"\n"
+    },
+    "ui_helpers": {
+      "version": "0.1.0",
+      "sha256": "6cecd8a81e3c49ad4a2419f6ac0a2b5f5fdd7a40951bee6e90f296f61d1680ed",
+      "source": "# Community package example: reusable UI helpers.\ndef heading(title):\n    return h2(title)\n\ndef card(content):\n    return section(content, class_=\"card\")\n"
+    }
+  }
+}

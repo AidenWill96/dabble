@@ -1,0 +1,45 @@
+name: Standalone dabble executables
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v0.5.*']
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-15
+            label: macos-arm64
+          - os: macos-15-intel
+            label: macos-x86_64
+          - os: ubuntu-24.04
+            label: linux-x86_64
+          - os: windows-2022
+            label: windows-x86_64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install build tooling
+        run: python -m pip install pyinstaller
+      - name: Build executable
+        run: python tools/build_standalone.py
+      - name: Smoke test packaged CLI
+        shell: bash
+        run: |
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            standalone/dabble.exe --version
+            standalone/dabble.exe new smoke-project
+            standalone/dabble.exe build smoke-project
+          else
+            ./standalone/dabble --version
+            ./standalone/dabble new smoke-project
+            ./standalone/dabble build smoke-project
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dabble-0.5-${{ matrix.label }}
+          path: standalone/dabble*

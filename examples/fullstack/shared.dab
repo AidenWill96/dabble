@@ -1,0 +1,2 @@
+def site_title():
+    return "dabble 0.5 — frontend + backend"

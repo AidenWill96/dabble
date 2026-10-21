@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>dabble — counter demo</title>
+  <style>
+    :root { font: 17px system-ui, sans-serif; color-scheme: light; }
+    body { background: #f4f6fb; margin: 0; padding: 3rem 1rem; }
+    .app { background: white; border: 1px solid #dce2eb; border-radius: 18px;
+      box-shadow: 0 12px 35px #12213b12; max-width: 520px; margin: auto; padding: 2rem; }
+    h1 { margin-top: 0; }
+    label { display: block; font-weight: 650; margin: 1.5rem 0 .4rem; }
+    input { padding: .7rem; border: 1px solid #bac4d3; border-radius: 8px; font: inherit; }
+    button { cursor: pointer; padding: .75rem 1.2rem; border: 0; border-radius: 9px; font: inherit; }
+    .primary { background: #3347aa; color: white; }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <script>
+/* dabble 0.1: tiny browser runtime. No dependencies. */
+(() => {
+  "use strict";
+
+  function signal(initial) {
+    let value = initial;
+    const observers = new Set();
+    return {
+      __dabbleSignal: true,
+      get() { return value; },
+      set(next) {
+        if (Object.is(next, value)) return;
+        value = next;
+        for (const notify of observers) notify(value);
+      },
+      subscribe(callback) {
+        observers.add(callback);
+        return () => observers.delete(callback);
+      }
+    };
+  }
+
+  function isSignal(x) {
+    return x !== null && typeof x === "object" && x.__dabbleSignal === true;
+  }
+
+  function appendChild(parent, child) {
+    if (child == null || child === false || child === true) return;
+    if (Array.isArray(child)) {
+      for (const item of child) appendChild(parent, item);
+    } else if (isSignal(child)) {
+      const text = document.createTextNode(String(child.get()));
+      child.subscribe(value => { text.textContent = String(value); });
+      parent.appendChild(text);
+    } else if (child instanceof Node) {
+      parent.appendChild(child);
+    } else if (typeof child === "string" || typeof child === "number") {
+      parent.appendChild(document.createTextNode(String(child)));
+    } else {
+      throw new TypeError("Cannot render dabble child: " + typeof child);
+    }
+  }
+
+  function applyProps(element, props) {
+    for (const [rawKey, value] of Object.entries(props)) {
+      const key = rawKey === "class_" ? "class"
+        : rawKey === "html_for" ? "for"
+        : rawKey.startsWith("data_") ? rawKey.replaceAll("_", "-")
+        : rawKey.startsWith("aria_") ? rawKey.replaceAll("_", "-")
+        : rawKey;
+      if (key.startsWith("on") && typeof value === "function") {
+        element.addEventListener(key.slice(2).toLowerCase(), value);
+      } else if (key === "style" && value && typeof value === "object") {
+        for (const [name, entry] of Object.entries(value)) {
+          element.style.setProperty(name.replaceAll("_", "-"), String(entry));
+        }
+      } else if (key === "value" || key === "checked") {
+        element[key] = value;
+      } else if (value === true) {
+        element.setAttribute(key, "");
+      } else if (value !== false && value != null) {
+        element.setAttribute(key, String(value));
+      }
+    }
+  }
+
+  function el(tag, ...args) {
+    if (typeof tag !== "string" || !/^[a-z][a-z0-9-]*$/.test(tag)) {
+      throw new TypeError("HTML tag must be a lowercase tag name");
+    }
+    const element = document.createElement(tag);
+    const tail = args.at(-1);
+    if (tail && !isSignal(tail) && Object.getPrototypeOf(tail) === Object.prototype) {
+      args.pop();
+      applyProps(element, tail);
+    }
+    for (const child of args) appendChild(element, child);
+    return element;
+  }
+
+  function mount(selector, component) {
+    const root = document.querySelector(selector);
+    if (!root) throw new Error("dabble mount target not found: " + selector);
+    const tree = typeof component === "function" ? component() : component;
+    root.replaceChildren();
+    appendChild(root, tree);
+    return root;
+  }
+
+  function truthy(x) {
+    if (x == null || x === false || x === 0 || x === "" || Number.isNaN(x)) return false;
+    if (Array.isArray(x)) return x.length > 0;
+    if (typeof x === "object" && !isSignal(x)) return Object.keys(x).length > 0;
+    return true;
+  }
+
+  function* range(...args) {
+    if (args.length < 1 || args.length > 3) throw new TypeError("range expects 1 to 3 arguments");
+    const [start, stop, step] = args.length === 1 ? [0, args[0], 1]
+      : args.length === 2 ? [args[0], args[1], 1] : args;
+    if (![start, stop, step].every(Number.isInteger) || step === 0) {
+      throw new TypeError("range expects integers and a nonzero step");
+    }
+    for (let i = start; step > 0 ? i < stop : i > stop; i += step) yield i;
+  }
+
+  function len(x) {
+    if (x == null || typeof x.length !== "number") throw new TypeError("len expects a string or array");
+    return x.length;
+  }
+
+  const api = {el, mount, signal, range, len, str: String, print: console.log, truthy};
+  const tags = "a article aside b br button code div em footer form h1 h2 h3 header img label li main nav ol option p pre section select small span strong textarea ul".split(" ");
+  for (const tag of tags) api[tag] = (...args) => el(tag, ...args);
+  api.input_ = (...args) => el("input", ...args);
+  window.dabble = Object.freeze(api);
+})();
+
+</script>
+  <script>
+// Generated by dabble 0.1. Do not edit directly.
+(() => {
+    "use strict";
+    const __dabble = window.dabble;
+    if (!__dabble) throw new Error("dabble runtime.js must load before compiled code");
+    function App() {
+        let clicks, name;
+        clicks = __dabble.signal(0);
+        name = __dabble.signal("world");
+        function increment() {
+            clicks.set((clicks.get() + 1));
+        }
+        function change_name(event) {
+            name.set(event.target.value);
+        }
+        return __dabble.main(__dabble.h1("Hello from dabble"), __dabble.p("A Python-like language that runs in the browser."), __dabble.label("Your name", {"html_for": "your-name"}), __dabble.input_({"id": "your-name", "value": "world", "oninput": change_name}), __dabble.p("Hello, ", name, "!"), __dabble.p("Clicks: ", clicks), __dabble.button("Add one", {"onclick": increment, "class_": "primary"}), {"class_": "app"});
+    }
+    __dabble.mount("#app", App);
+})();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+# dabble 0.1 — a reactive browser app
+
+def App():
+    clicks = signal(0)
+    name = signal("world")
+
+    def increment():
+        clicks.set(clicks.get() + 1)
+
+    def change_name(event):
+        name.set(event.target.value)
+
+    return main(
+        h1("Hello from dabble"),
+        p("A Python-like language that runs in the browser."),
+        label("Your name", html_for="your-name"),
+        input_(id="your-name", value="world", oninput=change_name),
+        p("Hello, ", name, "!"),
+        p("Clicks: ", clicks),
+        button("Add one", onclick=increment, class_="primary"),
+        class_="app"
+    )
+
+mount("#app", App)

@@ -1,0 +1,30 @@
+from shared import site_title
+
+style App:
+    background_color: "#102534"
+    color: "#f1f6ff"
+    padding: "2rem"
+    border_radius: "1rem"
+    hover:
+        background_color: "#153249"
+
+component App():
+    state count = 0
+    state message = "Click Load API to fetch from the dabble backend."
+
+    def increment():
+        count.set(count.get() + 1)
+
+    async def load():
+        data = await fetch_json("/api/hello")
+        message.set(data["message"])
+
+    return main(
+        h1(site_title()),
+        p("Counter: ", count),
+        button("Add 1", onclick=increment),
+        button("Load API", onclick=load),
+        p(message)
+    )
+
+mount("#app", App)

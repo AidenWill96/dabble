@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dabble-lang"
+version = "0.5.0"
+description = "The dabble web language: full-stack web compiler, reactive UI and CLI"
+readme = "README.md"
+requires-python = ">=3.10"
+keywords = ["programming-language", "compiler", "web", "cli"]
+
+[project.scripts]
+dabble = "dabble:main"
+
+[tool.setuptools]
+py-modules = ["dabble", "dabble_syntax"]
+packages = ["dabble_assets"]
+
+[tool.setuptools.package-data]
+dabble_assets = ["runtime.js", "dabble_server.cjs", "registry.json"]

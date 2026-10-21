@@ -1,0 +1,16 @@
+# dabble-only syntax: this cannot be parsed as Python.
+component App():
+    state count = 0
+    doubled = computed(lambda: count.get() * 2)
+
+    def increment():
+        count.set(count.get() + 1)
+
+    return main(
+        h1("dabble 0.3 — our own compiler"),
+        p("Count: ", count),
+        p("Double: ", doubled),
+        button("+1", onclick=increment)
+    )
+
+mount("#app", App)
